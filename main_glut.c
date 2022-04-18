@@ -21,7 +21,21 @@ typedef struct
 	GLfloat c2[3];
 }color;
 
+void read_data( int M, int N, float m[M][N],  FILE *file){
 
+	char line[50];
+
+	for(int i=0;i<M;i++){
+		for(int j=0;j<N;j++){
+			if(fgets(line, sizeof(line), file)){
+				m[i][j] = atof(line);
+			}else {
+				break;
+			}
+		}
+	}
+
+}
 void shade_triangle(triangle *v, color *c){
 	
 	/*for(int j =0; j<3; j++){
@@ -88,7 +102,44 @@ sleep(1);
 }
 
 int main(int argc, char** argv)
-{
+{	
+	char const* const fileName = "verts2d.txt"; /* should check that argc > 1 */
+	char const* const fileName2 = "vcolors.txt";
+	char const* const fileName3 = "faces.txt";
+	char const* const fileName4 = "depth.txt";
+
+    FILE *file , *file2, *file3, *file4;
+	// = fopen(fileName, "r"); /* should check the result */
+	
+    if ((file = fopen(fileName, "r")) == NULL){
+            printf("Could not process Matrix Market banner.\n");
+            exit(1);
+    }
+	if ((file2 = fopen(fileName2, "r")) == NULL){
+            printf("Could not process Matrix Market banner.\n");
+            exit(1);
+    }
+	if ((file3 = fopen(fileName3, "r")) == NULL){
+            printf("Could not process Matrix Market banner.\n");
+            exit(1);
+    }
+	if ((file4 = fopen(fileName4, "r")) == NULL){
+            printf("Could not process Matrix Market banner.\n");
+            exit(1);
+    }
+	
+	float verts2d[4999][2];
+	float vcolors[4999][3];
+	float faces[10000][3];
+	float depth[4999][1];
+
+	read_data(4999,2, verts2d,file);
+	read_data(4999, 3, vcolors,file2);
+	read_data(10000, 3, faces, file3);
+	read_data(4999, 1, depth, file4);
+	
+    
+
     double rgb[3][3];
     float V1[3][2] = {{185.0, 272.0},
                       {355.0, 250.0},
@@ -114,5 +165,10 @@ int main(int argc, char** argv)
     //init();
     glutDisplayFunc(render);
     glutMainLoop();
+	
+	fclose(file);
+    fclose(file2);
+	fclose(file3);
+    fclose(file4);
     return 0;
 }
