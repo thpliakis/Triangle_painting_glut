@@ -1,5 +1,5 @@
 CC=gcc
-CFLAGS = -lglut -lGLU -lGL
+CFLAGS = -lglut -lGLU -lGL -lm
 
 default: all
 

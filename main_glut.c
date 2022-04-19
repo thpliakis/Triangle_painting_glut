@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <time.h>
 #include <unistd.h>
+#include <math.h>
 
 //float canvas[512][512];
 
@@ -23,17 +24,19 @@ typedef struct
 
 typedef struct
 {
-	float verts2d[4999][2];
+	int verts2d[4999][2];
 	float vcolors[4999][3];
-	float faces[10000][3];
+	int faces[10000][3];
 	float depth[4999][1];
 }data;
+
+data d;
 
 typedef struct 
 {
 	int x;
 	int y;
-	float rgb[3]
+	float rgb[3];
 }point;
 
 
@@ -47,7 +50,7 @@ float interpolate_color(point p1, point p2, point p){
 }
 
 
-void read_data( int M, int N, float m[M][N],  FILE *file){
+void read_data_float( int M, int N, float m[M][N],  FILE *file){
 
 	char line[50];
 
@@ -60,8 +63,67 @@ void read_data( int M, int N, float m[M][N],  FILE *file){
 			}
 		}
 	}
-
 }
+
+void read_data_int( int M, int N, int m[M][N],  FILE *file){
+
+	char line[50];
+
+	for(int i=0;i<M;i++){
+		for(int j=0;j<N;j++){
+			if(fgets(line, sizeof(line), file)){
+				m[i][j] = (int)atof(line);
+			}else {
+				break;
+			}
+		}
+	}
+}
+
+void swap_int(int *a, int k, int l) {
+	int temp = a[k];
+	a[k] = a[l];
+	a[l] = temp;
+}
+
+void swap_float(float *a, int k, int l) {
+	float temp = a[k];
+	a[k] = a[l];
+	a[l] = temp;
+}
+
+
+/* partition -- in-place update of elements */
+int partition2(float *a,int *o, int n) {
+	float pivot = a[n-1];
+	int i = 0;
+	
+	for (int j = 0; j < n - 1; j++){
+		if (a[j] >= pivot){ 
+		swap_int(o,i,j);
+		swap_float(a,i++,j);
+		}
+	}
+
+	swap_float(a, i, n - 1);
+	swap_int(o, i, n - 1);
+	return (i);
+}
+
+/* qsortseq -- Entry point for QuickSort */
+void q_sort(float *a,int *o, int n) {
+	
+	if (n > 1) {
+		//printf("n = %d \n",n);
+		// if(l=3)
+		// 	printf("a[%d] = %d\n",l,o[l]);
+		// 	printf("a[%d] = %d\n",r,o[r]);
+		int p = partition2(a,o, n);
+		q_sort(a,o,p);
+		q_sort(&a[p+1],&o[p+1],n-p-1);
+	}
+}
+
 void shade_triangle(triangle *v, color *c){
 	
 	/*for(int j =0; j<3; j++){
@@ -90,25 +152,27 @@ void render(void)
 	
     glClearColor(0.5,0.5,0.5,0.3);      // Grey ackround color
     glClear(GL_COLOR_BUFFER_BIT);
-	/*GLfloat v0[3] =  {-0.52, 0.34 -0.04};
-	GLfloat v1[3] =  {-0.246, -0.65, -0.15};
-	GLfloat v2[3] =  {-0.15, -0.50, 0.0};
-	GLfloat c0[3] =  {0.742323, 0.229279, 0.356321};
-	GLfloat c1[3] =  {0.356321, 0.364300, 0.403574};
-	GLfloat c2[3] =  {0.403574, 0.321502, 0.000000};
-        
-	for(int i = 0; i<3; i++){
-		v.v0[i] = v0[i];
-		v.v1[i] = v1[i];
-		v.v2[i] = v2[i];
-		c.c0[i] = c0[i];	
-		c.c1[i] = c1[i];
-		c.c2[i] = c2[i];
-    }*/	
+
+	int facesLength = sizeof(d.faces) / sizeof(d.faces[0]);
+	float *d_Median = (float *) malloc(facesLength * sizeof(float));
+	for (int l = 0; l < facesLength; l++) d_Median[l] = 0.0;
+	int *d_Order = (int *) malloc(facesLength * sizeof(int)); 
+	for (int l = 0; l < facesLength; l++) d_Order[l] = l;
+
+	for(int i=0; i<facesLength;i++){
+		for(int j=0; j<3; j++){
+			d_Median[i] = d.depth[d.faces[i][j]][0] + d_Median[i]; 
+		}
+		d_Median[i] = d_Median[i]/3;
+	}
+
+	float max = d_Median[0];
+    float min = d_Median[0];
+
+   
 	
-	//c.c0[0] = (GLfloat)rand() / (GLfloat)RAND_MAX;
-	//c.c0[1] = (GLfloat)rand() / (GLfloat)RAND_MAX;
-	//c.c0[2] = (GLfloat)rand() / (GLfloat)RAND_MAX;
+	q_sort(d_Median,d_Order,facesLength) ;
+	
 	for(int t=0; t<30; t++){
 		for(int i = 0; i<3; i++){
 			v.v0[i] = -1 + (2*((GLfloat)rand()) / (GLfloat)RAND_MAX);
@@ -153,13 +217,18 @@ int main(int argc, char** argv)
             printf("Could not process Matrix Market banner.\n");
             exit(1);
     }
-	data d;
 
-	read_data(4999,2, d.verts2d,file);
-	read_data(4999, 3, d.vcolors,file2);
-	read_data(10000, 3, d.faces, file3);
-	read_data(4999, 1, d.depth, file4);
+	read_data_int(4999,2, d.verts2d,file);
+	read_data_float(4999, 3, d.vcolors,file2);
+	read_data_int(10000, 3, d.faces, file3);
+	read_data_float(4999, 1, d.depth, file4);
+	//return 0;
+	// printf("%d %d\n", d.verts2d[0][0], d.verts2d[0][1]);
+	// printf("%d %d\n", d.verts2d[1][0], d.verts2d[1][1]);
 
+	// printf("%d %d %d\n", d.faces[0][0], d.faces[0][1], d.faces[0][2]);
+	// printf("%d %d %d\n", d.faces[1][0], d.faces[1][1], d.faces[1][2]);
+	
     double rgb[3][3];
     float V1[3][2] = {{185.0, 272.0},
                       {355.0, 250.0},
