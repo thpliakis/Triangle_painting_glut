@@ -147,11 +147,10 @@ void render(void)
 {
 	triangle v;
 	color c;
-	glEnable( GL_BLEND );
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
 	
-    glClearColor(1.0,1.0,1.0,0.3);      // Grey ackround color
-    glClear(GL_COLOR_BUFFER_BIT);
+	glClearColor(0.5f, 0.5f, 0.5f, 0.5f);	// Grey ackround color
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);      
 	int triang_num = sizeof(d.faces) / sizeof(d.faces[0]);
 
 	glMatrixMode(GL_PROJECTION);
@@ -193,27 +192,16 @@ void render(void)
 	int max[2]={0,0};
 	int min[2]={600,600};
 	for(int t=0; t<triang_num; t++){
-		if(t==9999)
-			printf("done\n");
 		for(int i = 0; i<2; i++){
 			v.v0[i] = (GLint)d.verts2d[d.faces[t][0]][i];
 			v.v1[i] = (GLint)d.verts2d[d.faces[t][1]][i];
 			v.v2[i] = (GLint)d.verts2d[d.faces[t][2]][i];
-			
 		}
 		//printf("t : %d x = %d y = %d\n",t, v.v0[0],v.v0[1]);
 		for(int j=0; j<3; j++){	
 			c.c0[j] = (GLfloat)d.vcolors[d.faces[t][0]][j];
 			c.c1[j] = (GLfloat)d.vcolors[d.faces[t][0]][j];
 			c.c2[j] = (GLfloat)d.vcolors[d.faces[t][0]][j];
-			if(c.c0[j]>0.5)
-				printf("t:%d c.c[%d] = %f\n",t,j,c.c0[j]);
-			// if(c.c0[j]==0.0 || c.c0[j] == 1.0)
-			// 	printf("error");
-			// if(c.c1[j]==0.0 || c.c1[j] == 1.0)
-			// 	printf("error");
-			// if(c.c1[j]==0.0 || c.c2[j] == 1.0)
-			// 	printf("error");
 			
 		}		
 		shade_triangle(&v, &c);
@@ -221,17 +209,20 @@ void render(void)
 	}
 
 
-	glColor4f(0.082353, 0.078431,0.062745,0.1);
 
-	glBegin(GL_TRIANGLES);
-        glVertex2i(0,0);
-        glVertex2i(500,2);
-        glVertex2i(2,500);
-    glEnd();
+	// glBegin(GL_TRIANGLES);
+	// 	glColor4f(0.282353, 0.378431,0.862745,0.3);
+    //     glVertex2i(0,0);
+	// 	glColor4f(0.082353, 0.978431,0.062745,0.3);
+    //     glVertex2i(500,2);
+	// 	glColor4f(0.982353, 0.378431,0.262745,0.3);
+    //     glVertex2i(2,500);
+    // glEnd();
 
 glFlush();
+glutSwapBuffers();
 //glutPostRedisplay();
-sleep(1);
+//sleep(1);
     
 }
 
@@ -317,10 +308,15 @@ int main(int argc, char** argv)
 
 
     glutInit(&argc, argv);
-    glutInitDisplayMode( GLUT_SINGLE | GLUT_RGB );
+    glutInitDisplayMode( GLUT_DOUBLE | GLUT_RGB );
     glutInitWindowSize(600, 600);
     glutInitWindowPosition(100, 100);
     glutCreateWindow("Fish!");
+    //glClearColor(0.5f,0.5f,0.5f,0.3f);      // Grey ackround color
+	glClear(GL_COLOR_BUFFER_BIT);
+
+	glEnable( GL_BLEND );
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	
     //init();
     glutDisplayFunc(render);
