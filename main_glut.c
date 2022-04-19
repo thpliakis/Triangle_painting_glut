@@ -21,6 +21,32 @@ typedef struct
 	GLfloat c2[3];
 }color;
 
+typedef struct
+{
+	float verts2d[4999][2];
+	float vcolors[4999][3];
+	float faces[10000][3];
+	float depth[4999][1];
+}data;
+
+typedef struct 
+{
+	int x;
+	int y;
+	float rgb[3]
+}point;
+
+
+float interpolate_color(point p1, point p2, point p){
+	float r1  = sqrt(pow(p2.x - p.x,2) + pow(p2.y - p.y,2));
+	float r2  = sqrt(pow(p.x - p1.x,2) + pow(p.y - p1.y,2));
+	float percent = r1 / (r1+r2);
+	for(int i=0; i<3; i++){
+		p.rgb[i] = percent * p1.rgb[i] + (1 - percent) * p2.rgb[i];
+	}
+}
+
+
 void read_data( int M, int N, float m[M][N],  FILE *file){
 
 	char line[50];
@@ -127,18 +153,12 @@ int main(int argc, char** argv)
             printf("Could not process Matrix Market banner.\n");
             exit(1);
     }
-	
-	float verts2d[4999][2];
-	float vcolors[4999][3];
-	float faces[10000][3];
-	float depth[4999][1];
+	data d;
 
-	read_data(4999,2, verts2d,file);
-	read_data(4999, 3, vcolors,file2);
-	read_data(10000, 3, faces, file3);
-	read_data(4999, 1, depth, file4);
-	
-    
+	read_data(4999,2, d.verts2d,file);
+	read_data(4999, 3, d.vcolors,file2);
+	read_data(10000, 3, d.faces, file3);
+	read_data(4999, 1, d.depth, file4);
 
     double rgb[3][3];
     float V1[3][2] = {{185.0, 272.0},
