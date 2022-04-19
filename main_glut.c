@@ -10,9 +10,9 @@
 #define ALPHA 0.5
 typedef struct 
 {
-	GLfloat v0[3];
-	GLfloat v1[3];
-	GLfloat v2[3];
+	GLint v0[2];
+	GLint v1[2];
+	GLint v2[2];
 }triangle;
 
 typedef struct 
@@ -52,7 +52,7 @@ float interpolate_color(point p1, point p2, point p){
 
 void read_data_float( int M, int N, float m[M][N],  FILE *file){
 
-	char line[50];
+	char line[250];
 
 	for(int i=0;i<M;i++){
 		for(int j=0;j<N;j++){
@@ -67,7 +67,7 @@ void read_data_float( int M, int N, float m[M][N],  FILE *file){
 
 void read_data_int( int M, int N, int m[M][N],  FILE *file){
 
-	char line[50];
+	char line[250];
 
 	for(int i=0;i<M;i++){
 		for(int j=0;j<N;j++){
@@ -112,7 +112,7 @@ int partition2(float *a,int *o, int n) {
 
 /* qsortseq -- Entry point for QuickSort */
 void q_sort(float *a,int *o, int n) {
-	
+		
 	if (n > 1) {
 		//printf("n = %d \n",n);
 		// if(l=3)
@@ -131,14 +131,14 @@ void shade_triangle(triangle *v, color *c){
             v->v1[j] +=0.3;
             v->v2[j] -=0.3;
     }*/
-	GLfloat a = (GLfloat)rand() / (GLfloat)RAND_MAX;
+	GLfloat a =1;// (GLfloat)rand() / (GLfloat)RAND_MAX;
 	glBegin(GL_TRIANGLES);
 		glColor4f(c->c0[0],c->c0[1],c->c0[2],a);
-        glVertex3f(v->v1[0],v->v1[1],v->v1[2]);
+        glVertex2i(v->v1[0],v->v1[1]);
 		glColor4f(c->c1[0],c->c1[1],c->c1[2],a);
-        glVertex3f(v->v1[0],v->v2[1],v->v2[2]);
+        glVertex2i(v->v1[0],v->v2[1]);
 		glColor4f(c->c2[0],c->c2[1],c->c2[2],a);
-        glVertex3f(v->v2[0],v->v2[1],v->v2[2]);
+        glVertex2i(v->v2[0],v->v2[1]);
     glEnd();
 
 }
@@ -150,43 +150,87 @@ void render(void)
 	glEnable( GL_BLEND );
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	
-    glClearColor(0.5,0.5,0.5,0.3);      // Grey ackround color
+    glClearColor(1.0,1.0,1.0,0.3);      // Grey ackround color
     glClear(GL_COLOR_BUFFER_BIT);
+	int triang_num = sizeof(d.faces) / sizeof(d.faces[0]);
 
-	int facesLength = sizeof(d.faces) / sizeof(d.faces[0]);
-	float *d_Median = (float *) malloc(facesLength * sizeof(float));
-	for (int l = 0; l < facesLength; l++) d_Median[l] = 0.0;
-	int *d_Order = (int *) malloc(facesLength * sizeof(int)); 
-	for (int l = 0; l < facesLength; l++) d_Order[l] = l;
-
-	for(int i=0; i<facesLength;i++){
-		for(int j=0; j<3; j++){
-			d_Median[i] = d.depth[d.faces[i][j]][0] + d_Median[i]; 
+	glMatrixMode(GL_PROJECTION);
+	gluOrtho2D(0.0,600.0,600.0,0.0);
+	
+	// return;
+	
+	/*GLfloat v0[3] =  {-0.52, 0.34 -0.04};
+	GLfloat v1[3] =  {-0.246, -0.65, -0.15};
+	GLfloat v2[3] =  {-0.15, -0.50, 0.0};
+	GLfloat c0[3] =  {0.742323, 0.229279, 0.356321};
+	GLfloat c1[3] =  {0.356321, 0.364300, 0.403574};
+	GLfloat c2[3] =  {0.403574, 0.321502, 0.000000};
+        
+	for(int i = 0; i<3; i++){
+		v.v0[i] = v0[i];
+		v.v1[i] = v1[i];
+		v.v2[i] = v2[i];
+		c.c0[i] = c0[i];	
+		c.c1[i] = c1[i];
+		c.c2[i] = c2[i];
+    }*/	
+	
+	//c.c0[0] = (GLfloat)rand() / (GLfloat)RAND_MAX;
+	//c.c0[1] = (GLfloat)rand() / (GLfloat)RAND_MAX;
+	//c.c0[2] = (GLfloat)rand() / (GLfloat)RAND_MAX;
+	// for(int t=0; t<30; t++){
+	// 	for(int i = 0; i<3; i++){
+	// 		v.v0[i] = -1 + (2*((GLfloat)rand()) / (GLfloat)RAND_MAX);
+	// 		v.v1[i] = -1 + (2*((GLfloat)rand()) / (GLfloat)RAND_MAX);
+	// 		v.v2[i] = -1 + (2*((GLfloat)rand()) / (GLfloat)RAND_MAX);
+	// 		c.c0[i] = (GLfloat)rand() / (GLfloat)RAND_MAX;
+	// 		c.c1[i] = (GLfloat)rand() / (GLfloat)RAND_MAX;
+	// 		c.c2[i] = (GLfloat)rand() / (GLfloat)RAND_MAX;
+			
+	// 	}		
+	// 	shade_triangle(&v, &c);
+	// }
+	int max[2]={0,0};
+	int min[2]={600,600};
+	for(int t=0; t<triang_num; t++){
+		if(t==9999)
+			printf("done\n");
+		for(int i = 0; i<2; i++){
+			v.v0[i] = (GLint)d.verts2d[d.faces[t][0]][i];
+			v.v1[i] = (GLint)d.verts2d[d.faces[t][1]][i];
+			v.v2[i] = (GLint)d.verts2d[d.faces[t][2]][i];
+			
 		}
-		d_Median[i] = d_Median[i]/3;
-	}
-
-	float max = d_Median[0];
-    float min = d_Median[0];
-
-   
-	
-	q_sort(d_Median,d_Order,facesLength) ;
-	
-	for(int t=0; t<30; t++){
-		for(int i = 0; i<3; i++){
-			v.v0[i] = -1 + (2*((GLfloat)rand()) / (GLfloat)RAND_MAX);
-			v.v1[i] = -1 + (2*((GLfloat)rand()) / (GLfloat)RAND_MAX);
-			v.v2[i] = -1 + (2*((GLfloat)rand()) / (GLfloat)RAND_MAX);
-			c.c0[i] = (GLfloat)rand() / (GLfloat)RAND_MAX;
-			c.c1[i] = (GLfloat)rand() / (GLfloat)RAND_MAX;
-			c.c2[i] = (GLfloat)rand() / (GLfloat)RAND_MAX;
+		//printf("t : %d x = %d y = %d\n",t, v.v0[0],v.v0[1]);
+		for(int j=0; j<3; j++){	
+			c.c0[j] = (GLfloat)d.vcolors[d.faces[t][0]][j];
+			c.c1[j] = (GLfloat)d.vcolors[d.faces[t][0]][j];
+			c.c2[j] = (GLfloat)d.vcolors[d.faces[t][0]][j];
+			if(c.c0[j]>0.5)
+				printf("t:%d c.c[%d] = %f\n",t,j,c.c0[j]);
+			// if(c.c0[j]==0.0 || c.c0[j] == 1.0)
+			// 	printf("error");
+			// if(c.c1[j]==0.0 || c.c1[j] == 1.0)
+			// 	printf("error");
+			// if(c.c1[j]==0.0 || c.c2[j] == 1.0)
+			// 	printf("error");
 			
 		}		
 		shade_triangle(&v, &c);
+		
 	}
+
+
+	glColor4f(0.082353, 0.078431,0.062745,0.1);
+
+	glBegin(GL_TRIANGLES);
+        glVertex2i(0,0);
+        glVertex2i(500,2);
+        glVertex2i(2,500);
+    glEnd();
+
 glFlush();
-glutPostRedisplay();
+//glutPostRedisplay();
 sleep(1);
     
 }
@@ -197,6 +241,8 @@ int main(int argc, char** argv)
 	char const* const fileName2 = "vcolors.txt";
 	char const* const fileName3 = "faces.txt";
 	char const* const fileName4 = "depth.txt";
+
+	int temp_f[10000][3];
 
     FILE *file , *file2, *file3, *file4;
 	// = fopen(fileName, "r"); /* should check the result */
@@ -228,7 +274,32 @@ int main(int argc, char** argv)
 
 	// printf("%d %d %d\n", d.faces[0][0], d.faces[0][1], d.faces[0][2]);
 	// printf("%d %d %d\n", d.faces[1][0], d.faces[1][1], d.faces[1][2]);
-	
+
+	int triang_num = sizeof(d.faces) / sizeof(d.faces[0]);
+	float *d_Median = (float *) malloc(triang_num * sizeof(float));
+	for (int l = 0; l < triang_num; l++) d_Median[l] = 0.0;
+	int *d_Order = (int *) malloc(triang_num * sizeof(int)); 
+	for (int l = 0; l < triang_num; l++) d_Order[l] = l;
+
+	for(int i=0; i<triang_num;i++){
+		for(int j=0; j<3; j++){
+			d_Median[i] = d.depth[d.faces[i][j]][0] + d_Median[i]; 
+		}
+		d_Median[i] = d_Median[i]/3;
+	}
+	q_sort(d_Median,d_Order,triang_num);
+
+	for(int i=0; i<triang_num;i++)
+		for(int j=0; j<3; j++)	
+			temp_f[i][j] = d.faces[i][j];
+
+	for(int i=0; i<triang_num;i++)
+		for(int j=0; j<3; j++)
+			d.faces[i][j] = temp_f[d_Order[i]][j];
+			
+	// printf("median max = %f \n", d_Median[0]);
+	// printf("median min = %f \n", d_Median[triang_num-1]);
+
     double rgb[3][3];
     float V1[3][2] = {{185.0, 272.0},
                       {355.0, 250.0},
@@ -246,7 +317,7 @@ int main(int argc, char** argv)
 
 
     glutInit(&argc, argv);
-    glutInitDisplayMode(GLUT_SINGLE | GLUT_RGB );
+    glutInitDisplayMode( GLUT_SINGLE | GLUT_RGB );
     glutInitWindowSize(600, 600);
     glutInitWindowPosition(100, 100);
     glutCreateWindow("Fish!");
