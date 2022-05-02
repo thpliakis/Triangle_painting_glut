@@ -166,8 +166,8 @@ void shade_triangle(triangle *v, color *c, char *shade_t){
 	GLint Ykmin[3], Xkmin[3],Ykmax[3],Xkmax[3],activeSides[3],Min,Max;
 	GLint Xmin, Xmax, Ymin , Ymax;
 
-	GLint x1[2],x2[2],x3[2],x4[2]; //V[3][2],
-	GLfloat C1[3],C2[3],C3[3],C4[3],Xk[3]; //C[3][3],
+	GLint x1[2],x2[2],x3[2],x4[2], V[3][2];
+	GLfloat C1[3],C2[3],C3[3],C4[3],Xk[3],C[3][3];
 
 	GLint p[2];
 	GLfloat cp[3];
@@ -192,14 +192,14 @@ void shade_triangle(triangle *v, color *c, char *shade_t){
 	GLint vertex1, vertex2, pairs[3][2]; // Temp variables
 	int ptemp=0,cross_c=0;
 
-    GLfloat C[3][3] = {{0.818012,  0.251958,  0.817453}, 
-					   {0.923060,  0.989394,  0.942833}, 
- 					   {0.401391,  0.168952,  0.269701}};
-;
-    GLint V[3][2] = {{185, 172},
-                      {355, 350},
-                      {450, 100}};
-    srand(time(0));
+//     GLfloat C[3][3] = {{0.818012,  0.251958,  0.817453}, 
+// 					   {0.923060,  0.989394,  0.942833}, 
+//  					   {0.401391,  0.168952,  0.269701}};
+// ;
+//     GLint V[3][2] = {{185, 172},
+//                       {355, 350},
+//                       {450, 100}};
+//     srand(time(0));
 
     // for(int i = 0; i<3; i++){
     //     for(int j =0; j<2; j++){
@@ -216,21 +216,21 @@ void shade_triangle(triangle *v, color *c, char *shade_t){
 		cflat[i];
 	}
 
-	// V[0][0] = v->v0[0];
-	// V[0][1] = v->v0[1];
-	// V[1][0] = v->v1[0];
-	// V[1][1] = v->v1[1];
-	// V[2][0] = v->v2[0];
-	// V[2][1] = v->v2[1];
-	// C[0][0] = c->c0[0];
-	// C[0][1] = c->c0[1];
-	// C[0][2] = c->c0[2];
-	// C[1][0] = c->c1[0];
-	// C[1][1] = c->c1[1];
-	// C[1][2] = c->c1[2];
-	// C[2][0] = c->c2[0];
-	// C[2][1] = c->c2[1];
-	// C[2][2] = c->c2[2];
+	V[0][0] = v->v0[0];
+	V[0][1] = v->v0[1];
+	V[1][0] = v->v1[0];
+	V[1][1] = v->v1[1];
+	V[2][0] = v->v2[0];
+	V[2][1] = v->v2[1];
+	C[0][0] = c->c0[0];
+	C[0][1] = c->c0[1];
+	C[0][2] = c->c0[2];
+	C[1][0] = c->c1[0];
+	C[1][1] = c->c1[1];
+	C[1][2] = c->c1[2];
+	C[2][0] = c->c2[0];
+	C[2][1] = c->c2[1];
+	C[2][2] = c->c2[2];
 	// For each side we find the min and max X,Y coordinates and calculate the slope m
 	for(int i=0; i<3; i++){
 		vertex1 = i;
@@ -241,7 +241,7 @@ void shade_triangle(triangle *v, color *c, char *shade_t){
     	pairs[i][1] = vertex2;
 
 		m[i]=(GLfloat)(V[vertex2][1]-V[vertex1][1])/ (GLfloat)(V[vertex2][0]-V[vertex1][0]);
-		printf("m[%d] = %f\n",i,m[i]);
+		// printf("m[%d] = %f\n",i,m[i]);
 
 		// Xkmin[i] = Min_f(V[vertex1][0],V[vertex2][0]);
 		// Xkmax[i] = Max_f(V[vertex1][0],V[vertex2][0]);
@@ -557,8 +557,8 @@ void render(void)
 	glMatrixMode(GL_PROJECTION);
 	gluOrtho2D(0.0,600.0,600.0,0.0);
 	
-	// for(int t=0; t<triang_num; t++){
-	for(int t=0; t<1; t++){
+	for(int t=0; t<triang_num; t++){
+	// for(int t=0; t<1; t++){
 		for(int i = 0; i<2; i++){
 			v.v0[i] = (GLint)d.verts2d[d.faces[t][0]][i];
 			v.v1[i] = (GLint)d.verts2d[d.faces[t][1]][i];
